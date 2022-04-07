@@ -1,38 +1,43 @@
-import read_file
 import numpy as np
 import common
 
-DATASET_DIR = "../dataset/"
-ORIGIN_FILE = DATASET_DIR + "longdress_vox10_1300.ply"
+from ismember import ismember
+from get_neighbours import get_neighbours
+from build_lut import build_lut
+from sample_point_cloud import upsample_geometry_point_cloud
 
-s, molecule, denominator = 1.8, 9, 5
 
-remainder, x_channel = common.get_parameter(s, molecule, denominator)
+def get_super_resolution_v(v_down, s, molecule, denominator):
+    remainder, x_channel = common.get_parameter(s, molecule, denominator)
+    remainder_array = np.mod(v_down, denominator)
+    num_child, num_child_label = common.get_child_label(remainder_array, remainder, x_channel)
+    child_case, children = common.get_cell(num_child_label)
+    cube = common.mesh_cube([0, 1])
 
-[v_origin, c_origin] = read_file.read_file(ORIGIN_FILE)
-T = v_origin.min(0)
+    uncles = get_neighbours(v_down, 1)
+    lut = build_lut(v_down, s, molecule, denominator)
 
-v_d = np.subtract(v_origin, T)
-v_d = np.around(np.divide(v_d, s))
-r = np.mod(v_d, denominator)
+    v_super = [np.array([]).astype(int) for row in range(8)]
+    v_result = np.array([])
 
-multiply_child_shape = [np.size(r, 0), np.size(r, 1), np.size(remainder)]
-multiply_child = np.zeros(multiply_child_shape)
+    for i in range(8):
+        uncles_i = uncles[child_case[i]]
+        maximal = np.sum(common.children_decimal(children[i]))
+        table = np.multiply(np.ones(uncles_i.shape), maximal)
 
-for i in range(0, np.size(remainder)):
-    multiply_child[:, :, i] = np.sum(x_channel[i, :]) * (np.isin(r, remainder[i]))
+        if i == 0:
+            v_super[i] = upsample_geometry_point_cloud(v_down[child_case[i]], s, children[i], table)
+            v_result = v_super[i]
+        else:
+            is_lut, index = ismember(uncles_i, lut[i - 1][:, 0])
+            table[is_lut] = lut[i - 1][index, 1]
+            table = np.fliplr(np.unpackbits(table.astype(np.uint8), axis=1)).reshape(-1, 1)
+            table = table.astype(float)
+            table[np.where(table == 0)] = np.nan
+            table = np.multiply(table, np.kron(num_child[child_case[i]], np.ones((cube.shape[0], 1))))
+            v_super[i] = upsample_geometry_point_cloud(v_down[child_case[i]], s, cube, table)
 
-num_child = np.sum(multiply_child, 2)
-num_child_label = np.dot(np.abs(num_child), np.array([[4, 2, 1]]).T)
+            v_result = np.concatenate((v_result, v_super[i]), axis=0)
+    v_result = np.unique(v_result, axis=0)
 
-child_case_1 = np.isin(num_child_label, 0)
-child_case_2 = np.isin(num_child_label, 4)
-child_case_3 = np.isin(num_child_label, 2)
-child_case_4 = np.isin(num_child_label, 1)
-child_case_5 = np.isin(num_child_label, 3)
-child_case_6 = np.isin(num_child_label, 5)
-child_case_7 = np.isin(num_child_label, 6)
-child_case_8 = np.isin(num_child_label, 7)
-
-print(sum(child_case_3))
-
+    return v_result

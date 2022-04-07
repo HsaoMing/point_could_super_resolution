@@ -5,14 +5,14 @@ from get_neighbours import get_neighbours
 from child_node_occupancy import get_child_node
 from sample_point_cloud import downsample_point_cloud
 from build_lut import build_lut
+from lut_sr_fractional import get_super_resolution_v
 
 DATASET_DIR = "../dataset/"
-ORIGIN_FILE = DATASET_DIR + "longdress_vox10_1300.ply"
+ORIGIN_FILE = DATASET_DIR + "downsample.ply"
 
 
 def main():
-    [v_origin, c_origin] = common.read_file(ORIGIN_FILE)
-    edge = v_origin.min(0)
+    v_down, c_down = common.read_file(ORIGIN_FILE)
 
     s, molecule, denominator = 1.8, 9, 5
     '''
@@ -35,7 +35,10 @@ def main():
     print(table.shape)
     get_neighbours(v_d, 1)
     '''
-    build_lut(v_origin, s, molecule, denominator)
+
+    v_result = get_super_resolution_v(v_down, s, molecule, denominator)
+    c_result = np.zeros(v_result.shape).astype(np.uint8)
+    common.write_file('test.ply', v_result, c_result)
 
 
 if __name__ == '__main__':

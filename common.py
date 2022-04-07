@@ -21,7 +21,7 @@ def read_file(file_name):
 
     origin_data_array = origin_data_str.split()
     # list to np.array and string to int
-    origin_data_array = np.array(origin_data_array).astype(int)
+    origin_data_array = np.array(origin_data_array).astype(float).astype(int)
 
     origin_data_array = origin_data_array.reshape(-1, 6)
     [v_origin, c_origin] = np.split(origin_data_array, 2, 1)
@@ -119,3 +119,18 @@ def children_decimal(children):
     label_weight = np.power(2, children_label)
 
     return label_weight
+
+
+def write_file(file_name, v_result, c_result):
+    fp = open(file_name, mode='w')
+    fp.write("ply\nformat ascii 1.0\ncomment Nothing to comment\n")
+    fp.write("element vertex " + str(v_result.shape[0]) + "\n")
+    fp.write("property float x\nproperty float y\nproperty float z\n")
+    fp.write("property uchar red\nproperty uchar green\nproperty uchar blue\n")
+    fp.write("end_header\n")
+
+    result = np.concatenate((v_result, c_result), axis=1)
+    for line in result:
+        line.tofile(fp, sep=' ', format="%s")
+        fp.write("\n")
+    fp.close()

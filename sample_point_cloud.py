@@ -30,13 +30,13 @@ def downsample_point_cloud(v_origin, c_origin, s):
     return np.round(v_down), np.round(c_down)
 
 
-def upsample_geometry_point_cloud(v_d, s, child, table):
+def upsample_geometry_point_cloud(v_down, s, child, table):
     up_scale = np.ones((child.shape[0], 1))
-    scale = np.ones((v_d.shape[0], 1))
+    scale = np.ones((v_down.shape[0], 1))
 
     difference = table < 0
-    v_up = np.round(np.kron(np.multiply(v_d, s), up_scale))
+    v_up = np.round(np.kron(np.multiply(v_down, s), up_scale))
     tmp_table = np.kron(scale, child)
     v_up = v_up + np.multiply(np.abs(table), tmp_table) - difference
-
+    v_up = np.delete(v_up, np.all(np.isnan(v_up), axis=1), axis=0)
     return v_up.astype(int)
