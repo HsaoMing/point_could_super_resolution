@@ -22,7 +22,7 @@ def get_super_resolution_v(v_down, s, molecule, denominator):
 
     for i in range(8):
         uncles_i = uncles[child_case[i]]
-        maximal = np.sum(common.children_decimal(children[i]))
+        maximal = np.sum(common.children_decimal(children[i])) - 1
         table = np.multiply(np.ones(uncles_i.shape), maximal)
 
         if i == 0:

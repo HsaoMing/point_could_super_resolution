@@ -7,14 +7,16 @@ from sample_point_cloud import downsample_point_cloud
 from build_lut import build_lut
 from lut_sr_fractional import get_super_resolution_v
 
-DATASET_DIR = "../dataset/"
-ORIGIN_FILE = DATASET_DIR + "downsample.ply"
+DATASET_DIR = "../downsample/"
+FILE_NAME = "soldier_vox10_0600x2"
+ORIGIN_FILE = DATASET_DIR + FILE_NAME + ".ply"
+RESULT_FILE = "../upsample/" + FILE_NAME + "x2.ply"
 
 
 def main():
-    v_down, c_down = common.read_file(ORIGIN_FILE)
+    v_origin, c_origin = common.read_file(ORIGIN_FILE)
 
-    s, molecule, denominator = 1.8, 9, 5
+    s, molecule, denominator = 2, 2, 1
     '''
     v_d = np.subtract(v_origin, edge)
     
@@ -36,9 +38,9 @@ def main():
     get_neighbours(v_d, 1)
     '''
 
-    v_result = get_super_resolution_v(v_down, s, molecule, denominator)
+    v_result = get_super_resolution_v(v_origin, s, molecule, denominator)
     c_result = np.zeros(v_result.shape).astype(np.uint8)
-    common.write_file('test.ply', v_result, c_result)
+    common.write_file(RESULT_FILE, v_result, c_result)
 
 
 if __name__ == '__main__':

@@ -57,12 +57,12 @@ def intersect(array_1, array_2):
 def get_parameter(s, molecule, denominator):
     # Fractional Super-Resolution of Voxelized Point Clouds Page 3 Fig 2
     x = np.arange(0, molecule * np.floor(s))
-    xd = np.around(np.divide(x, s))
+    xd = np.floor(np.add(np.divide(x, s), 0.5))
 
     hist, _ = np.histogram(xd, x)
     remainder = np.where(hist == np.ceil(s))
     remainder = np.asarray(remainder).reshape(-1)
-    difference = x - np.around(np.multiply(xd, s))
+    difference = x - np.floor(np.add(np.multiply(xd, s), 0.5))
 
     # np.isin is equal ismember in matlab
     remainder_index = np.isin(xd, remainder)
