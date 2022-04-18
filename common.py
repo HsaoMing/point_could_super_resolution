@@ -69,7 +69,7 @@ def get_parameter(s, molecule, denominator):
     x_channel = np.extract(remainder_index, difference).reshape(-1, np.int(np.ceil(s)))
 
     if molecule % denominator == 0:
-        remainder = 0
+        remainder = np.array([0])
 
     return remainder, x_channel
 
@@ -79,6 +79,7 @@ def get_child_label(remainder_array, remainder, x_channel):
     multiply_child = np.zeros(multiply_child_shape)
 
     for i in range(np.size(remainder)):
+
         multiply_child[:, :, i] = np.sum(x_channel[i, :]) * (np.isin(remainder_array, remainder[i]))
 
     num_child = np.sum(multiply_child, 2)

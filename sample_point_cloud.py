@@ -39,4 +39,4 @@ def upsample_geometry_point_cloud(v_down, s, child, table):
     tmp_table = np.kron(scale, child)
     v_up = v_up + np.multiply(np.abs(table), tmp_table) - difference
     v_up = np.delete(v_up, np.all(np.isnan(v_up), axis=1), axis=0)
-    return v_up.astype(int)
+    return v_up

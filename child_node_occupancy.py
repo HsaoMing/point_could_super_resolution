@@ -21,18 +21,19 @@ def get_child_node(v_down, v_origin, s, molecule, denominator):
     num_child, num_child_label = common.get_child_label(remainder_array, remainder, x_channel)
     child_case, children = common.get_cell(num_child_label)
 
-    table = np.kron(num_child[child_case[0]], np.ones((children[0].shape[0], 1)))
-    v_up = upsample_geometry_point_cloud(v_down[child_case[0]], s, children[0], table)
-    kids = child_node_assignment(v_up, v_origin, children[0])
-    v_tmp = v_down[child_case[0]]
+    kids = np.array([np.nan]).reshape(-1, 1)
+    v_tmp = np.array([np.nan, np.nan, np.nan]).reshape(-1, 3)
 
-    for i in range(1, 8):
-        table = np.kron(num_child[child_case[i]], np.ones((children[i].shape[0], 1)))
-        v_up = upsample_geometry_point_cloud(v_down[child_case[i]], s, children[i], table)
+    for i in range(8):
+        if np.any(child_case[i] != 0):
+            table = np.kron(num_child[child_case[i]], np.ones((children[i].shape[0], 1)))
+            v_up = upsample_geometry_point_cloud(v_down[child_case[i]], s, children[i], table)
 
-        tmp = child_node_assignment(v_up, v_origin, children[i])
-        kids = np.append(kids, tmp, axis=0)
-        v_tmp = np.append(v_tmp, v_down[child_case[i]], axis=0)
+            tmp = child_node_assignment(v_up, v_origin, children[i])
+            kids = np.append(kids, tmp, axis=0)
+            v_tmp = np.append(v_tmp, v_down[child_case[i]], axis=0)
+            v_tmp = np.delete(v_tmp, np.all(np.isnan(v_tmp), axis=1), axis=0)
+            kids = np.delete(kids, np.all(np.isnan(kids), axis=1), axis=0)
 
     _, index = ismember(v_down, v_tmp, 'rows')
     kids = kids[index]

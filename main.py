@@ -1,22 +1,25 @@
 import numpy as np
-
+import open3d
 import common
 from get_neighbours import get_neighbours
 from child_node_occupancy import get_child_node
 from sample_point_cloud import downsample_point_cloud
 from build_lut import build_lut
+
 from lut_sr_fractional import get_super_resolution_v
 
 DATASET_DIR = "../downsample/"
-FILE_NAME = "soldier_vox10_0600x2"
+FILE_NAME = "soldier_vox10_0600d1.5"
 ORIGIN_FILE = DATASET_DIR + FILE_NAME + ".ply"
-RESULT_FILE = "../upsample/" + FILE_NAME + "x2.ply"
+RESULT_FILE = "../upsample/" + FILE_NAME + "u2.0.ply"
 
 
 def main():
-    v_origin, c_origin = common.read_file(ORIGIN_FILE)
+    pcd = open3d.io.read_point_cloud(ORIGIN_FILE)
+    v_origin = np.asarray(pcd.points)
 
-    s, molecule, denominator = 2, 2, 1
+    s, molecule, denominator = 2.0, 2, 1
+
     '''
     v_d = np.subtract(v_origin, edge)
     
@@ -37,8 +40,13 @@ def main():
     print(table.shape)
     get_neighbours(v_d, 1)
     '''
+    edge = np.min(v_origin, axis=0)
+    v_origin = np.subtract(v_origin, edge)
 
-    v_result = get_super_resolution_v(v_origin, s, molecule, denominator)
+    v_down = np.floor(np.add(np.divide(v_origin, s), 0.5))
+
+    v_result = get_super_resolution_v(v_down, s, molecule, denominator)
+    v_result = np.add(v_result, edge).astype(int)
     c_result = np.zeros(v_result.shape).astype(np.uint8)
     common.write_file(RESULT_FILE, v_result, c_result)
 
