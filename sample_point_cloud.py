@@ -1,4 +1,5 @@
 import numpy as np
+from common import round_array
 
 
 def downsample_point_cloud(v_origin, c_origin, s):
@@ -15,7 +16,7 @@ def downsample_point_cloud(v_origin, c_origin, s):
     c_down: narray
 
     """
-    v_down, index_back, counts = np.unique(np.floor(np.add((v_origin / s), 0.5)),
+    v_down, index_back, counts = np.unique(round_array(v_origin / s),
                                            return_inverse=True,
                                            return_counts=True,
                                            axis=0)
@@ -27,7 +28,7 @@ def downsample_point_cloud(v_origin, c_origin, s):
 
     c_down = np.divide(c_down, np.array(counts).reshape(-1, 1))
 
-    return np.floor(np.add(v_down, 0.5)), np.floor(np.add(c_down, 0.5))
+    return round_array(v_down), round_array(c_down)
 
 
 def upsample_geometry_point_cloud(v_down, s, child, table):

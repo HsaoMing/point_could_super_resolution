@@ -56,7 +56,7 @@ def build_lut(v_origin, s, molecule, denominator):
             vector = np.zeros((m_uncles.shape[0], 8))
             for bit in range(8):
                 vector[:, bit] = np.bincount(m_index, kids_bin[:, bit])
-                vector[:, bit] = np.floor(np.add(np.divide(vector[:, bit], m_counts), 0.5))
+                vector[:, bit] = common.round_array(np.divide(vector[:, bit], m_counts))
             vector = vector.astype(int)
             m_lut = np.concatenate((m_uncles.reshape(-1, 1), np.packbits(vector, axis=1)),
                                    axis=1)

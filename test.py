@@ -28,7 +28,7 @@ class TestCommon(unittest.TestCase):
         self.assertEqual(s, molecule / denominator)
 
     def test_intersect(self):
-        array_1 = np.arange(24).reshape(-1, 3)
+        array_1 = np.arange(300000).reshape(-1, 3)
         array_2 = np.arange(6, 18).reshape(-1, 3)
         position_1, position_2 = common.intersect(array_1, array_2)
 

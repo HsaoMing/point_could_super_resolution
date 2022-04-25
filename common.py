@@ -44,6 +44,10 @@ def position_quantization_scale(rp, gp):
     return s, molecule, denominator
 
 
+def round_array(array):
+    return np.floor(np.add(array, 0.5))
+
+
 def intersect(array_1, array_2):
     array_1 = np.array(array_1, order='C')
     array_2 = np.array(array_2, order='C')
@@ -57,12 +61,12 @@ def intersect(array_1, array_2):
 def get_parameter(s, molecule, denominator):
     # Fractional Super-Resolution of Voxelized Point Clouds Page 3 Fig 2
     x = np.arange(0, molecule * np.floor(s))
-    xd = np.floor(np.add(np.divide(x, s), 0.5))
+    xd = round_array(np.divide(x, s))
 
     hist, _ = np.histogram(xd, x)
     remainder = np.where(hist == np.ceil(s))
     remainder = np.asarray(remainder).reshape(-1)
-    difference = x - np.floor(np.add(np.multiply(xd, s), 0.5))
+    difference = x - round_array(np.multiply(xd, s))
 
     # np.isin is equal ismember in matlab
     remainder_index = np.isin(xd, remainder)
